@@ -1,0 +1,13 @@
+{
+  "itemGroup.mechanica": "Example Mod Tab",
+  "block.mechanica.example_block": "Example Block",
+  "item.mechanica.example_item": "Example Item",
+
+  "mechanica.configuration.title": "Mechanica Configs",
+  "mechanica.configuration.section.mechanica.common.toml": "Mechanica Configs",
+  "mechanica.configuration.section.mechanica.common.toml.title": "Mechanica Configs",
+  "mechanica.configuration.items": "Item List",
+  "mechanica.configuration.logDirtBlock": "Log Dirt Block",
+  "mechanica.configuration.magicNumberIntroduction": "Magic Number Text",
+  "mechanica.configuration.magicNumber": "Magic Number"
+}

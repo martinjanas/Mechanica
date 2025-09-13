@@ -1,0 +1,56 @@
+package martinjanas.mechanica;
+
+import martinjanas.mechanica.api.energy.EnergyBuffer;
+import martinjanas.mechanica.api.energy.EnergyUnit;
+import martinjanas.mechanica.registries.*;
+import martinjanas.mechanica.registries.impl.ModRegistry;
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+
+import java.util.List;
+
+@Mod(Mechanica.MOD_ID)
+public class Mechanica
+{
+    public static final String MOD_ID = "mechanica";
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public Mechanica(IEventBus bus, ModContainer container)
+    {
+        List<ModRegistry> mod_registries = List.of(new ItemRegistry(), new BlockRegistry(), new BlockItemRegistry(),
+                new BlockEntityRegistry(), new CreativeTabRegistry(), new MenuRegistry(), new RecipeRegistry(), new EnchantmentRegistry());
+
+        bus.addListener(this::CommonSetup);
+
+        for (ModRegistry registry : mod_registries)
+             registry.register(bus);
+
+        container.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+    }
+
+    private void CommonSetup(FMLCommonSetupEvent event)
+    {
+        EnergyBuffer buffer = new EnergyBuffer(5, 2, 1);
+
+        LOGGER.info(buffer.toString());
+
+        for (int i = 0; i < 10; i++)
+        {
+            buffer.insert(7_200_000);
+            LOGGER.info("Energy: {}", buffer.toString());
+        }
+    }
+}
