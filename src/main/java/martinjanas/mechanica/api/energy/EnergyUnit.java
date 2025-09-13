@@ -18,7 +18,7 @@ public class EnergyUnit
         return kwh;
     }
 
-    public long GetJoules()
+    public long ToJoules()
     {
         return joules;
     }

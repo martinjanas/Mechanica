@@ -18,30 +18,31 @@ public class EnergyBuffer
 
     public void insert(long amount)
     {
-        var to_insert = Math.max(0, Math.min(max_input.GetJoules(), amount));
+        var to_insert = Math.clamp(amount, 0, max_input.ToJoules());
         buffer.Increase(to_insert);
 
-        var joules = Math.max(0, Math.min(capacity.GetJoules(), buffer.GetJoules()));
+        var joules = Math.clamp(buffer.ToJoules(), 0, capacity.ToJoules());
         buffer.SetJoules(joules);
     }
 
     public void extract(long amount)
     {
-        var to_remove = Math.max(0, Math.min(max_output.GetJoules(), amount));
+        var to_remove = Math.clamp(amount, 0, max_output.ToJoules());
         buffer.Decrease(to_remove);
 
-        var joules = Math.max(0, Math.min(capacity.GetJoules(), buffer.GetJoules()));
+        var joules = Math.clamp(buffer.ToJoules(), 0, capacity.ToJoules());
         buffer.SetJoules(joules);
     }
 
     @Override
     public String toString()
     {
-        return buffer.GetJoules() + "J, " + "kWh: " + buffer.ToKWH();
+        return buffer.ToJoules() + "J, " + "kWh: " + buffer.ToKWH();
     }
 
-    private EnergyUnit buffer;
     private final EnergyUnit capacity;
     private final EnergyUnit max_input;
     private final EnergyUnit max_output;
+
+    private EnergyUnit buffer;
 }
