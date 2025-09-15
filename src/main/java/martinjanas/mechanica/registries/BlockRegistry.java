@@ -1,6 +1,7 @@
 package martinjanas.mechanica.registries;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.blocks.BlockGenerator;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -15,18 +16,16 @@ public class BlockRegistry implements ModRegistry
 
     /*public static DeferredBlock<Block> healer;
     public static DeferredBlock<Block> crafter;
-    public static DeferredBlock<Block> barrel;
+    public static DeferredBlock<Block> barrel;*/
     public static DeferredBlock<Block> generator;
-    public static DeferredBlock<Block> multiblock;*/
 
     @Override
     public void register(IEventBus bus)
     {
         /*healer = blocks.register("healer", () -> new BlockHealer(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)));
         crafter = blocks.register("crafter", () -> new BlockCrafter(BlockBehaviour.Properties.of().strength(50f, 1200f)));
-        barrel = blocks.register("barrel", () -> new BlockBarrel(BlockBehaviour.Properties.of().strength(1f, 1200f)));
+        barrel = blocks.register("barrel", () -> new BlockBarrel(BlockBehaviour.Properties.of().strength(1f, 1200f)));*/
         generator = blocks.register("generator", () -> new BlockGenerator(BlockBehaviour.Properties.of().strength(1f, 1200f)));
-        multiblock = blocks.register("multiblock", () -> new BlockMultiBlock(BlockBehaviour.Properties.of().strength(1f, 1200f)));*/
 
         blocks.register(bus);
     }

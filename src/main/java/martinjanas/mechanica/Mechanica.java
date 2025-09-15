@@ -43,14 +43,5 @@ public class Mechanica
 
     private void CommonSetup(FMLCommonSetupEvent event)
     {
-        EnergyBuffer buffer = new EnergyBuffer(5, 2, 1);
-
-        LOGGER.info(buffer.toString());
-
-        for (int i = 0; i < 10; i++)
-        {
-            buffer.insert(7_200_000);
-            LOGGER.info("Energy: {}", buffer.toString());
-        }
     }
 }

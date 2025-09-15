@@ -1,5 +1,11 @@
 package martinjanas.mechanica.api.energy;
 
+/*
+*
+* Todo: Brainstorm this $hit later
+*
+* */
+
 public class EnergyBuffer
 {
     public EnergyBuffer(EnergyUnit capacity, EnergyUnit max_input, EnergyUnit max_output)
@@ -32,6 +38,16 @@ public class EnergyBuffer
 
         var joules = Math.clamp(buffer.ToJoules(), 0, capacity.ToJoules());
         buffer.SetJoules(joules);
+    }
+
+    public void set_joules(long joules)
+    {
+        buffer.SetJoules(joules);
+    }
+
+    public long get_joules()
+    {
+        return buffer.ToJoules();
     }
 
     @Override
