@@ -1,6 +1,7 @@
 package martinjanas.mechanica.registries;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.blocks.BlockEnergyAcceptor;
 import martinjanas.mechanica.blocks.BlockGenerator;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.world.level.block.Block;
@@ -18,6 +19,7 @@ public class BlockRegistry implements ModRegistry
     public static DeferredBlock<Block> crafter;
     public static DeferredBlock<Block> barrel;*/
     public static DeferredBlock<Block> generator;
+    public static DeferredBlock<Block> energy_acceptor;
 
     @Override
     public void register(IEventBus bus)
@@ -26,6 +28,7 @@ public class BlockRegistry implements ModRegistry
         crafter = blocks.register("crafter", () -> new BlockCrafter(BlockBehaviour.Properties.of().strength(50f, 1200f)));
         barrel = blocks.register("barrel", () -> new BlockBarrel(BlockBehaviour.Properties.of().strength(1f, 1200f)));*/
         generator = blocks.register("generator", () -> new BlockGenerator(BlockBehaviour.Properties.of().strength(1f, 1200f)));
+        energy_acceptor = blocks.register("energy_acceptor", () -> new BlockEnergyAcceptor(BlockBehaviour.Properties.of().strength(1f, 1200f)));
 
         blocks.register(bus);
     }

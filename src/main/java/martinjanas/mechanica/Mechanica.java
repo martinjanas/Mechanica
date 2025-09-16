@@ -31,7 +31,7 @@ public class Mechanica
     public Mechanica(IEventBus bus, ModContainer container)
     {
         List<ModRegistry> mod_registries = List.of(new ItemRegistry(), new BlockRegistry(), new BlockItemRegistry(),
-                new BlockEntityRegistry(), new CreativeTabRegistry(), new MenuRegistry(), new RecipeRegistry(), new EnchantmentRegistry());
+                new BlockEntityRegistry(), new CreativeTabRegistry(), new MenuRegistry(), new RecipeRegistry(), new EnchantmentRegistry(), new CapabilityRegistry());
 
         bus.addListener(this::CommonSetup);
 

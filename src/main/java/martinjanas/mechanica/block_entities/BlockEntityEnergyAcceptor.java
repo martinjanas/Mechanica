@@ -3,12 +3,15 @@ package martinjanas.mechanica.block_entities;
 import martinjanas.mechanica.api.energy.EnergyBuffer;
 import martinjanas.mechanica.api.energy.IEnergyBlock;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
+import martinjanas.mechanica.registries.CapabilityRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 
 /*
 *   Todo: Create an energy acceptor block that accepts energy, generator should provide power from all sides
@@ -21,15 +24,15 @@ import net.minecraft.world.level.block.state.BlockState;
 *   Todo: Look at Neoforge's EnergyStorage capability/class later or smth.
 * */
 
-public class BlockEntityGenerator extends BlockEntity implements IEnergyBlock
+public class BlockEntityEnergyAcceptor extends BlockEntity implements IEnergyBlock
 {
     private EnergyBuffer buffer = new EnergyBuffer(1.0, 1.0, 1.0);
 
     private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
 
-    public BlockEntityGenerator(BlockPos pos, BlockState blockState)
+    public BlockEntityEnergyAcceptor(BlockPos pos, BlockState blockState)
     {
-        super(BlockEntityRegistry.generator.get(), pos, blockState);
+        super(BlockEntityRegistry.energy_acceptor.get(), pos, blockState);
     }
 
     @Override
@@ -57,18 +60,29 @@ public class BlockEntityGenerator extends BlockEntity implements IEnergyBlock
         if (level.isClientSide())
             return;
 
-        long joules_per_tick = 6000; //18000 joules in 1 tick - 1 kWh in 10 real seconds
-        buffer.insert(joules_per_tick);
+        long maxPerTick = 18000;
+
+        for (Direction dir : Direction.values())
+        {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockEntity neighbor = level.getBlockEntity(neighborPos);
+
+            if (neighbor != null)
+            {
+                BlockCapability<EnergyBuffer, Void> energyCap = CapabilityRegistry.ENERGY;
+                EnergyBuffer sourceBuffer = energyCap.getCapability(level, neighborPos, level.getBlockState(neighborPos), neighbor, null);
+
+                if (sourceBuffer != null)
+                {
+                    sourceBuffer.extract(maxPerTick);
+                    buffer.insert(maxPerTick);
+                }
+            }
+        }
+
         setChanged();
 
-        System.out.println("Generator: " + buffer.toString());
-    }
-
-
-    @Override
-    public void invalidateCapabilities()
-    {
-        super.invalidateCapabilities();
+        System.out.println("EnergyAcceptor: " + buffer.toString());
     }
 
     @Override

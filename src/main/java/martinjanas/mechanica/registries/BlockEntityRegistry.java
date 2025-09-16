@@ -1,6 +1,7 @@
 package martinjanas.mechanica.registries;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.core.registries.Registries;
@@ -16,6 +17,7 @@ public class BlockEntityRegistry implements ModRegistry
     //public static DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityCrafter>> crafter;
     //public static DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityBarrel>> barrel;
     public static DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityGenerator>> generator;
+    public static DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEnergyAcceptor>> energy_acceptor;
 
     @Override
     public void register(IEventBus bus)
@@ -23,6 +25,7 @@ public class BlockEntityRegistry implements ModRegistry
         //crafter = block_entities.register("crafter", () -> BlockEntityType.Builder.of(BlockEntityCrafter::new, BlockRegistry.crafter.get()).build(null));
         //barrel = block_entities.register("barrel", () -> BlockEntityType.Builder.of(BlockEntityBarrel::new, BlockRegistry.barrel.get()).build(null));
         generator = block_entities.register("generator", () -> BlockEntityType.Builder.of(BlockEntityGenerator::new, BlockRegistry.generator.get()).build(null));
+        energy_acceptor = block_entities.register("energy_acceptor", () -> BlockEntityType.Builder.of(BlockEntityEnergyAcceptor::new, BlockRegistry.energy_acceptor.get()).build(null));
 
         block_entities.register(bus);
     }
