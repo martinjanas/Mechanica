@@ -1,7 +1,7 @@
 package martinjanas.mechanica.block_entities.impl;
 
 import martinjanas.mechanica.api.energy.EnergyBuffer;
-import martinjanas.mechanica.api.energy.IEnergyBuffer;
+import martinjanas.mechanica.api.energy.impl.IEnergyBuffer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;

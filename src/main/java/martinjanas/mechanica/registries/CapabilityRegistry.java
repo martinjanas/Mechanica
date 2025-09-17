@@ -1,14 +1,16 @@
 package martinjanas.mechanica.registries;
 
 import martinjanas.mechanica.api.energy.EnergyBuffer;
-import martinjanas.mechanica.api.energy.IEnergyBuffer;
+import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+
+import java.util.function.Function;
 
 public class CapabilityRegistry implements ModRegistry
 {
@@ -22,34 +24,26 @@ public class CapabilityRegistry implements ModRegistry
 
     private void OnRegisterCapabilities(RegisterCapabilitiesEvent event)
     {
-        event.registerBlockEntity(
-                ENERGY,
-                BlockEntityRegistry.generator.get(),
-                new ICapabilityProvider<BlockEntity, Void, EnergyBuffer>()
-                {
-                    @Override
-                    public EnergyBuffer getCapability(BlockEntity be, Void context) {
-                        if (be instanceof IEnergyBuffer energyBlock) {
-                            return energyBlock.GetEnergyBuffer();
-                        }
-                        return null;
-                    }
-                }
-        );
+        for (var entry : BlockEntityRegistry.block_entities.getEntries())
+        {
+            @SuppressWarnings("unchecked")
+            BlockEntityType<BaseMachineBlockEntity> machine = (BlockEntityType<BaseMachineBlockEntity>) entry.get();
 
-        event.registerBlockEntity(
-                ENERGY,
-                BlockEntityRegistry.energy_acceptor.get(),
-                new ICapabilityProvider<BlockEntity, Void, EnergyBuffer>()
-                {
-                    @Override
-                    public EnergyBuffer getCapability(BlockEntity be, Void context) {
-                        if (be instanceof IEnergyBuffer energyBlock) {
-                            return energyBlock.GetEnergyBuffer();
-                        }
-                        return null;
-                    }
-                }
-        );
+            RegisterBlockEntityCapability(event, machine, ENERGY, BaseMachineBlockEntity::GetEnergyBuffer);
+        }
+    }
+
+    private <BE extends BaseMachineBlockEntity, T, C> void RegisterBlockEntityCapability(RegisterCapabilitiesEvent event, BlockEntityType<BE> type, BlockCapability<T, C> cap, Function<BE, T> getter)
+    {
+        var cap_provider = new ICapabilityProvider<BE, C, T>()
+        {
+            @Override
+            public T getCapability(BE be, C context)
+            {
+                return getter.apply(be);
+            }
+        };
+
+        event.registerBlockEntity(cap, type, cap_provider);
     }
 }

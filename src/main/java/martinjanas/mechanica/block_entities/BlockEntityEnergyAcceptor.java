@@ -1,7 +1,6 @@
 package martinjanas.mechanica.block_entities;
 
 import martinjanas.mechanica.api.energy.EnergyBuffer;
-import martinjanas.mechanica.api.energy.IEnergyBuffer;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import martinjanas.mechanica.registries.CapabilityRegistry;
