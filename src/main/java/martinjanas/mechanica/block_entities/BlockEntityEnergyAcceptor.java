@@ -1,7 +1,8 @@
 package martinjanas.mechanica.block_entities;
 
 import martinjanas.mechanica.api.energy.EnergyBuffer;
-import martinjanas.mechanica.api.energy.IEnergyBlock;
+import martinjanas.mechanica.api.energy.IEnergyBuffer;
+import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import martinjanas.mechanica.registries.CapabilityRegistry;
 import net.minecraft.core.BlockPos;
@@ -13,18 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 
-/*
-*   Todo: Create an energy acceptor block that accepts energy, generator should provide power from all sides
-*
-*   Currently the generator is generating 18000 joules/tick (1 kWh in 10 irl seconds) to its inner buffer
-*   Once it detects an energy acceptor by its side provide energy by using buffer.extract() ?
-*
-*   Should we be using something like capabilities for this when two blocks "communicate" between each other?
-*
-*   Todo: Look at Neoforge's EnergyStorage capability/class later or smth.
-* */
-
-public class BlockEntityEnergyAcceptor extends BlockEntity implements IEnergyBlock
+public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 {
     private EnergyBuffer buffer = new EnergyBuffer(1.0, 1.0, 1.0);
 
@@ -60,7 +50,7 @@ public class BlockEntityEnergyAcceptor extends BlockEntity implements IEnergyBlo
         if (level.isClientSide())
             return;
 
-        long maxPerTick = 18000;
+        long maxPerTick = 12000;
 
         for (Direction dir : Direction.values())
         {

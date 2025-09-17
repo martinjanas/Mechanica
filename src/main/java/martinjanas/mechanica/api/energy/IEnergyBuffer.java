@@ -1,6 +1,6 @@
 package martinjanas.mechanica.api.energy;
 
-public interface IEnergyBlock
+public interface IEnergyBuffer
 {
     EnergyBuffer GetEnergyBuffer();
 }

@@ -2,6 +2,7 @@ package martinjanas.mechanica.blocks;
 
 import martinjanas.mechanica.api.energy.EnergyBuffer;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
+import martinjanas.mechanica.blocks.impl.BaseMachineBlock;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -13,9 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockGenerator extends Block implements EntityBlock
+public class BlockGenerator extends BaseMachineBlock
 {
-
     public BlockGenerator(Properties properties)
     {
         super(properties);
