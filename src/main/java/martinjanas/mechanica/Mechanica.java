@@ -1,5 +1,6 @@
 package martinjanas.mechanica;
 
+import martinjanas.mechanica.api.network.EnergyNetwork;
 import martinjanas.mechanica.registries.*;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import org.slf4j.Logger;

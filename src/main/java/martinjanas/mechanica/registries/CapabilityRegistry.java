@@ -1,6 +1,6 @@
 package martinjanas.mechanica.registries;
 
-import martinjanas.mechanica.api.energy.EnergyBuffer;
+import martinjanas.mechanica.api.energy.EnergyStorage;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class CapabilityRegistry implements ModRegistry
 {
-    public static final BlockCapability<EnergyBuffer, Void> ENERGY = BlockCapability.createVoid(ResourceLocation.fromNamespaceAndPath("mechanica", "energy"), EnergyBuffer.class);
+    public static final BlockCapability<EnergyStorage, Void> ENERGY = BlockCapability.createVoid(ResourceLocation.fromNamespaceAndPath("mechanica", "energy"), EnergyStorage.class);
 
     @Override
     public void register(IEventBus bus)
@@ -29,7 +29,7 @@ public class CapabilityRegistry implements ModRegistry
             @SuppressWarnings("unchecked")
             BlockEntityType<BaseMachineBlockEntity> machine = (BlockEntityType<BaseMachineBlockEntity>) entry.get();
 
-            RegisterBlockEntityCapability(event, machine, ENERGY, BaseMachineBlockEntity::GetEnergyBuffer);
+            RegisterBlockEntityCapability(event, machine, ENERGY, BaseMachineBlockEntity::GetEnergyStorage);
         }
     }
 

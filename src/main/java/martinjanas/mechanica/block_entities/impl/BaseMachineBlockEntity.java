@@ -1,13 +1,13 @@
 package martinjanas.mechanica.block_entities.impl;
 
-import martinjanas.mechanica.api.energy.EnergyBuffer;
-import martinjanas.mechanica.api.energy.impl.IEnergyBuffer;
+import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.energy.impl.IEnergyStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class BaseMachineBlockEntity extends BlockEntity implements IEnergyBuffer
+public abstract class BaseMachineBlockEntity extends BlockEntity implements IEnergyStorage
 {
     public BaseMachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState)
     {
@@ -15,5 +15,5 @@ public abstract class BaseMachineBlockEntity extends BlockEntity implements IEne
     }
 
     @Override
-    public abstract EnergyBuffer GetEnergyBuffer();
+    public abstract EnergyStorage GetEnergyStorage();
 }

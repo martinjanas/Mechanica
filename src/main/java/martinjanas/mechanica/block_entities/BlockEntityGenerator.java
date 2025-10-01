@@ -1,6 +1,8 @@
 package martinjanas.mechanica.block_entities;
 
-import martinjanas.mechanica.api.energy.EnergyBuffer;
+import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.network.EnergyNetwork;
+import martinjanas.mechanica.api.network.NetworkManager;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import net.minecraft.core.BlockPos;
@@ -9,12 +11,16 @@ import net.minecraft.nbt.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 public class BlockEntityGenerator extends BaseMachineBlockEntity
 {
-    private EnergyBuffer buffer = new EnergyBuffer(1.0, 1.0, 1.0);
+    public long JOULES_PER_TICK = 6000; //25 joules per tick for real 1 kWh per irl hour
 
-    private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
+    private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
+    private boolean network_registered = false;
+    private boolean network_joined = false;
 
     public BlockEntityGenerator(BlockPos pos, BlockState blockState)
     {
@@ -25,7 +31,7 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putLong("EnergyStored", buffer.get_joules());
+        tag.putLong("EnergyStored", buffer.GetStored());
 
         setChanged();
     }
@@ -36,7 +42,7 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         super.loadAdditional(tag, registries);
 
         if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
-            buffer.set_joules(tag.getLong("EnergyStored"));
+            buffer.SetStored(tag.getLong("EnergyStored"));
 
         setChanged();
     }
@@ -46,8 +52,7 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         if (level.isClientSide())
             return;
 
-        long joules_per_tick = 18000; //18000 joules in 1 tick - 1 kWh in 10 real seconds
-        buffer.insert(joules_per_tick);
+        buffer.Insert(JOULES_PER_TICK);
         setChanged();
 
         System.out.println("Generator: " + buffer.toString());
@@ -61,8 +66,22 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     }
 
     @Override
-    public EnergyBuffer GetEnergyBuffer()
+    public EnergyStorage GetEnergyStorage()
     {
         return buffer;
+    }
+
+    public void OnRightClick(PlayerInteractEvent.RightClickBlock event)
+    {
+        if (!network_registered)
+            network_registered = NetworkManager.Get().Register("Energy1", EnergyNetwork::new);
+
+        if (!network_joined)
+            network_joined = NetworkManager.Get().Join("Energy1", this);
+    }
+
+    public void OnDestroyBlock(BlockEvent.BreakEvent event)
+    {
+        network_joined = NetworkManager.Get().Disconnect("Energy1", this);
     }
 }

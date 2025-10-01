@@ -2,6 +2,8 @@ package martinjanas.mechanica.api.energy;
 
 public class EnergyUnit
 {
+    private long joules;
+
     public EnergyUnit(long joules)
     {
         this.joules = joules;
@@ -18,7 +20,7 @@ public class EnergyUnit
         return kwh;
     }
 
-    public long ToJoules()
+    public long GetJoules()
     {
         return joules;
     }
@@ -28,15 +30,13 @@ public class EnergyUnit
         joules = amount;
     }
 
-    public void Increase(long joules)
+    public void AddJoules(long joules)
     {
         this.joules += joules;
     }
 
-    public void Decrease(long joules)
+    public void RemoveJoules(long joules)
     {
         this.joules -= joules;
     }
-
-    private long joules;
 }

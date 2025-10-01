@@ -5,7 +5,9 @@ import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.blocks.impl.BaseMachineBlock;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
+import martinjanas.mechanica.registries.BlockItemRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -13,7 +15,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlockEnergyAcceptor extends BaseMachineBlock
 {
@@ -36,5 +42,14 @@ public class BlockEnergyAcceptor extends BaseMachineBlock
             if (be instanceof BlockEntityEnergyAcceptor energy_acceptor)
                 energy_acceptor.tick(lvl, pos, st, be);
         } : null;
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params)
+    {
+        List<ItemStack> list = new ArrayList();
+        list.add(new ItemStack(BlockItemRegistry.energy_acceptor.asItem()));
+
+        return list;
     }
 }

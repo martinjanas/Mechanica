@@ -1,6 +1,7 @@
 package martinjanas.mechanica.block_entities;
 
-import martinjanas.mechanica.api.energy.EnergyBuffer;
+import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.network.NetworkManager;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import martinjanas.mechanica.registries.CapabilityRegistry;
@@ -12,12 +13,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 {
-    private EnergyBuffer buffer = new EnergyBuffer(1.0, 1.0, 1.0);
-
+    private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
     private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
+    private boolean network_joined = false;
 
     public BlockEntityEnergyAcceptor(BlockPos pos, BlockState blockState)
     {
@@ -28,7 +31,7 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putLong("EnergyStored", buffer.get_joules());
+        tag.putLong("EnergyStored", buffer.GetStored());
 
         setChanged();
     }
@@ -39,7 +42,7 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
         super.loadAdditional(tag, registries);
 
         if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
-            buffer.set_joules(tag.getLong("EnergyStored"));
+            buffer.SetStored(tag.getLong("EnergyStored"));
 
         setChanged();
     }
@@ -49,24 +52,22 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
         if (level.isClientSide())
             return;
 
-        long maxPerTick = 12000;
-
         for (Direction dir : Direction.values())
         {
-            BlockPos neighborPos = pos.relative(dir);
-            BlockEntity neighbor = level.getBlockEntity(neighborPos);
+            BlockPos neighbor_pos = pos.relative(dir);
+            BlockEntity neighbor = level.getBlockEntity(neighbor_pos);
+            if (neighbor == null)
+                continue;
 
-            if (neighbor != null)
-            {
-                BlockCapability<EnergyBuffer, Void> energyCap = CapabilityRegistry.ENERGY;
-                EnergyBuffer sourceBuffer = energyCap.getCapability(level, neighborPos, level.getBlockState(neighborPos), neighbor, null);
+            EnergyStorage source_buffer = CapabilityRegistry.ENERGY.getCapability(level, neighbor_pos, level.getBlockState(neighbor_pos), neighbor, null);
+            if (source_buffer == null)
+                continue;
 
-                if (sourceBuffer != null)
-                {
-                    sourceBuffer.extract(maxPerTick);
-                    buffer.insert(maxPerTick);
-                }
-            }
+            if (!(neighbor instanceof BlockEntityGenerator generator))
+                continue;
+
+            source_buffer.Extract(generator.JOULES_PER_TICK);
+            buffer.Insert(generator.JOULES_PER_TICK);
         }
 
         setChanged();
@@ -75,8 +76,25 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     }
 
     @Override
-    public EnergyBuffer GetEnergyBuffer()
+    public EnergyStorage GetEnergyStorage()
     {
         return buffer;
+    }
+
+    public void OnRightClick(PlayerInteractEvent.RightClickBlock event)
+    {
+        if (!network_joined)
+            network_joined = NetworkManager.Get().Join("Energy1", this);
+    }
+
+    public void OnDestroyBlock(BlockEvent.BreakEvent event)
+    {
+        network_joined = NetworkManager.Get().Disconnect("Energy1", this);
+    }
+
+    @Override
+    public boolean isRemoved()
+    {
+        return super.isRemoved();
     }
 }
