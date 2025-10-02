@@ -40,7 +40,7 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         buffer.Insert(JOULES_PER_TICK);
         setChanged();
 
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 
         System.out.println("Generator: " + buffer.toString());
     }
@@ -88,7 +88,7 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
     {
-        saveAdditional(tag, lookupProvider);
+        loadAdditional(tag, lookupProvider);
         super.handleUpdateTag(tag, lookupProvider);
     }
 
@@ -101,7 +101,6 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     @Override
     public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
     {
-        //return super.getUpdatePacket();
         return ClientboundBlockEntityDataPacket.create(this);
     }
 }

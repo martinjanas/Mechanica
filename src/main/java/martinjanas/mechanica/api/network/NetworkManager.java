@@ -1,5 +1,6 @@
 package martinjanas.mechanica.api.network;
 
+import martinjanas.mechanica.Mechanica;
 import martinjanas.mechanica.api.network.impl.BaseNetwork;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;

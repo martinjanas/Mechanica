@@ -1,16 +1,25 @@
 package martinjanas.mechanica.api.event;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.api.network.EnergyNetwork;
 import martinjanas.mechanica.api.network.NetworkManager;
+import martinjanas.mechanica.api.packet.JoinNetworkPacket;
+import martinjanas.mechanica.api.packet.RegisterNetworkPacket;
 import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
+import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 //No need to call NeoForge.EVENT_BUS.register(ModEventManager.class); with the usage of @EventBusSubscriber
 @EventBusSubscriber(modid = Mechanica.MOD_ID)
@@ -65,10 +74,40 @@ public class EventManager
     }
 
     @SubscribeEvent
-    public static void OnServerTick(PlayerTickEvent.Post event)
+    public static void registerPackets(RegisterPayloadHandlersEvent event)
     {
-        var level = event.getEntity().level();
-        if (level.isClientSide())
+        event.registrar("mechanica")
+                .playToServer(
+                        RegisterNetworkPacket.TYPE,
+                        RegisterNetworkPacket.CODEC,
+                        (pkt, context) -> {
+                            context.enqueueWork(() -> {
+                                NetworkManager.Get().Register(pkt.name(), EnergyNetwork::new);
+                            });
+                        }
+                );
+
+        event.registrar("mechanica").playToServer(
+                JoinNetworkPacket.TYPE,
+                JoinNetworkPacket.CODEC,
+                (pkt, context) -> {
+                    context.enqueueWork(() -> {
+                        ServerPlayer player = (ServerPlayer) context.player();
+                        Level level = player.level();
+
+                        BlockEntity be = level.getBlockEntity(pkt.pos());
+                        if (be instanceof BaseMachineBlockEntity machine) {
+                            NetworkManager.Get().Join(pkt.name(), machine);
+                        }
+                    });
+                }
+        );
+    }
+
+    @SubscribeEvent
+    public static void OnServerTick(LevelTickEvent.Post event)
+    {
+        if (!(event.getLevel() instanceof ServerLevel))
             return;
 
         NetworkManager.Get().OnServerTick();

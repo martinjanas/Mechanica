@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -57,10 +58,9 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
         }
 
         setChanged();
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
-
-        System.out.println("EnergyAcceptor: " + buffer.toString());
+        System.out.println("EnergyAcceptor: " + GetEnergyStorage().toString());
     }
 
     @Override
@@ -80,8 +80,6 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     {
         super.saveAdditional(tag, registries);
         tag.putLong("EnergyStored", buffer.GetStored());
-
-        setChanged();
     }
 
     @Override
@@ -89,10 +87,8 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     {
         super.loadAdditional(tag, registries);
 
-        if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
+        if (tag.contains("EnergyStored" , NumericTag.TAG_LONG))
             buffer.SetStored(tag.getLong("EnergyStored"));
-
-        setChanged();
     }
 
     @Override
@@ -106,7 +102,7 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
     {
-        saveAdditional(tag, lookupProvider);
+        loadAdditional(tag, lookupProvider);
         super.handleUpdateTag(tag, lookupProvider);
     }
 
@@ -120,7 +116,6 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     @Override
     public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
     {
-        //return super.getUpdatePacket();
         return ClientboundBlockEntityDataPacket.create(this);
     }
 }

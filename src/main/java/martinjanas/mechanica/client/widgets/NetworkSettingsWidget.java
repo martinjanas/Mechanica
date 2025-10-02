@@ -2,6 +2,8 @@ package martinjanas.mechanica.client.widgets;
 
 import martinjanas.mechanica.api.network.EnergyNetwork;
 import martinjanas.mechanica.api.network.NetworkManager;
+import martinjanas.mechanica.api.packet.JoinNetworkPacket;
+import martinjanas.mechanica.api.packet.RegisterNetworkPacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -50,7 +52,9 @@ public class NetworkSettingsWidget extends AbstractWidget
             String name = name_input.getValue().trim();
             if (!name.isEmpty())
             {
-                NetworkManager.Get().Register(name, EnergyNetwork::new);
+                //TODO: This doesnt fire on the client when playing on server, or something is just wrong - the
+                // network isnt added on the clientside
+                Minecraft.getInstance().getConnection().send(new RegisterNetworkPacket(name));
                 name_input.setValue("");
             }
         }).bounds(this.pos.x + this.size.x - 40, this.pos.y + 30, 30, 20).build();
@@ -140,7 +144,7 @@ public class NetworkSettingsWidget extends AbstractWidget
             if (mouseX >= this.pos.x + 20 && mouseX <= this.pos.x + this.size.x - 36 && mouseY >= entry_y && mouseY <= entry_y + 16)
             {
                 selected_network = i;
-                NetworkManager.Get().Join(network_names.get(i), machine);
+                Minecraft.getInstance().getConnection().send(new JoinNetworkPacket(network_names.get(i), machine.getBlockPos()));
             }
         }
 
