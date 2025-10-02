@@ -1,5 +1,7 @@
 package martinjanas.mechanica;
 
+import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
+import martinjanas.mechanica.client.screens.EnergyAcceptorScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,8 +20,10 @@ import martinjanas.mechanica.client.screens.GeneratorScreen;
 @Mod(value = Mechanica.MOD_ID, dist = Dist.CLIENT)
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = Mechanica.MOD_ID, value = Dist.CLIENT)
-public class MechanicaClient {
-    public MechanicaClient(ModContainer container) {
+public class MechanicaClient
+{
+    public MechanicaClient(ModContainer container)
+    {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
@@ -27,8 +31,8 @@ public class MechanicaClient {
     }
 
     @SubscribeEvent
-    static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
+    static void onClientSetup(FMLClientSetupEvent event)
+    {
         Mechanica.LOGGER.info("HELLO FROM CLIENT SETUP");
         Mechanica.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
@@ -43,5 +47,8 @@ public class MechanicaClient {
         var be = level.getBlockEntity(event.getPos());
         if (be instanceof BlockEntityGenerator generator)
             Minecraft.getInstance().setScreen(new GeneratorScreen(generator));
+
+        if (be instanceof BlockEntityEnergyAcceptor acceptor)
+            Minecraft.getInstance().setScreen(new EnergyAcceptorScreen(acceptor));
     }
 }

@@ -19,8 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockEntityGenerator extends BaseMachineBlockEntity
@@ -28,9 +26,6 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     public long JOULES_PER_TICK = 3000; //25 joules per tick for real 1 kWh per irl hour
 
     private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
-    private boolean network_registered = false;
-    private boolean network_joined = false;
-    private int ticks = 0;
 
     public BlockEntityGenerator(BlockPos pos, BlockState blockState)
     {
@@ -48,30 +43,6 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 
         System.out.println("Generator: " + buffer.toString());
-
-        ticks++;
-    }
-
-    public void OnRightClick(PlayerInteractEvent.RightClickBlock event)
-    {
-        if (!network_registered)
-            network_registered = NetworkManager.Get().Register("Energy1", EnergyNetwork::new);
-
-        if (!network_joined)
-            network_joined = NetworkManager.Get().Join("Energy1", this);
-
-        var level = event.getLevel();
-        if (level != null && !level.isClientSide())
-        {
-            var pos = event.getPos();
-            var state = level.getBlockState(pos);
-            level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
-        }
-    }
-
-    public void OnDestroyBlock(BlockEvent.BreakEvent event)
-    {
-        network_joined = NetworkManager.Get().Disconnect("Energy1", this);
     }
 
     @Override
@@ -117,9 +88,9 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
     {
+        saveAdditional(tag, lookupProvider);
         super.handleUpdateTag(tag, lookupProvider);
     }
-
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)

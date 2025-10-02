@@ -9,42 +9,28 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 {
     private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
     private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
-    private boolean network_joined = false;
 
+    //TODO: Desync between server & client when sending energy across network - fix
     public BlockEntityEnergyAcceptor(BlockPos pos, BlockState blockState)
     {
         super(BlockEntityRegistry.energy_acceptor.get(), pos, blockState);
-    }
-
-    @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
-    {
-        super.saveAdditional(tag, registries);
-        tag.putLong("EnergyStored", buffer.GetStored());
-
-        setChanged();
-    }
-
-    @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
-    {
-        super.loadAdditional(tag, registries);
-
-        if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
-            buffer.SetStored(tag.getLong("EnergyStored"));
-
-        setChanged();
     }
 
     public <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T e)
@@ -72,6 +58,8 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 
         setChanged();
 
+        level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
+
         System.out.println("EnergyAcceptor: " + buffer.toString());
     }
 
@@ -81,20 +69,58 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
         return buffer;
     }
 
-    public void OnRightClick(PlayerInteractEvent.RightClickBlock event)
+    @Override
+    public void invalidateCapabilities()
     {
-        if (!network_joined)
-            network_joined = NetworkManager.Get().Join("Energy1", this);
-    }
-
-    public void OnDestroyBlock(BlockEvent.BreakEvent event)
-    {
-        network_joined = NetworkManager.Get().Disconnect("Energy1", this);
+        super.invalidateCapabilities();
     }
 
     @Override
-    public boolean isRemoved()
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
-        return super.isRemoved();
+        super.saveAdditional(tag, registries);
+        tag.putLong("EnergyStored", buffer.GetStored());
+
+        setChanged();
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        super.loadAdditional(tag, registries);
+
+        if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
+            buffer.SetStored(tag.getLong("EnergyStored"));
+
+        setChanged();
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    {
+        var tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider)
+    {
+        saveAdditional(tag, lookupProvider);
+        super.handleUpdateTag(tag, lookupProvider);
+    }
+
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)
+    {
+        super.onDataPacket(net, pkt, lookupProvider);
+    }
+
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket()
+    {
+        //return super.getUpdatePacket();
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }

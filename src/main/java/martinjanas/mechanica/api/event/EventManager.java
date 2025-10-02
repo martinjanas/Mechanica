@@ -32,10 +32,10 @@ public class EventManager
             return;
 
         BlockEntity block_entity = level.getBlockEntity(event.getPos());
-        if (block_entity instanceof BlockEntityGenerator generator)
+        /*if (block_entity instanceof BlockEntityGenerator generator)
             generator.OnRightClick(event);
         else if (block_entity instanceof BlockEntityEnergyAcceptor acceptor)
-            acceptor.OnRightClick(event);
+            acceptor.OnRightClick(event);*/
     }
 
     @SuppressWarnings("unused")
@@ -58,10 +58,10 @@ public class EventManager
             return;
 
         BlockEntity block_entity = level.getBlockEntity(event.getPos());
-        if (block_entity instanceof BlockEntityGenerator generator)
+        /*if (block_entity instanceof BlockEntityGenerator generator)
             generator.OnDestroyBlock(event);
         else if (block_entity instanceof BlockEntityEnergyAcceptor acceptor)
-            acceptor.OnDestroyBlock(event);
+            acceptor.OnDestroyBlock(event);*/
     }
 
     @SubscribeEvent

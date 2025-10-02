@@ -1,32 +1,32 @@
 package martinjanas.mechanica.client.screens;
 
+import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
+import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.client.widgets.NetworkSettingsWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.core.BlockPos;
-
-import martinjanas.mechanica.api.energy.EnergyStorage;
-import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import org.joml.Vector2i;
 
-public class GeneratorScreen extends Screen
+public class EnergyAcceptorScreen extends Screen
 {
     private final BlockPos pos;
     private final Level level;
-    private BlockEntityGenerator generator;
+    private BlockEntityEnergyAcceptor acceptor;
     private NetworkSettingsWidget widget;
     boolean display_network_settings = false;
 
-    public GeneratorScreen(BlockEntityGenerator generator)
+    public EnergyAcceptorScreen(BlockEntityEnergyAcceptor acceptor)
     {
-        super(Component.literal("Generator"));
-        this.pos = generator.getBlockPos();
-        this.level = generator.getLevel();
-        this.generator = generator;
+        super(Component.literal("Acceptor"));
+        this.pos = acceptor.getBlockPos();
+        this.level = acceptor.getLevel();
+        this.acceptor = acceptor;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class GeneratorScreen extends Screen
         Vector2i overlay_size = new Vector2i(220, 140);
         Vector2i overlay_pos = new Vector2i((this.width - overlay_size.x) / 2, 40);
 
-        widget = new NetworkSettingsWidget(overlay_pos, overlay_size, minecraft, this.generator);
+        widget = new NetworkSettingsWidget(overlay_pos, overlay_size, minecraft, this.acceptor);
 
         Button network_settings_widget = Button.builder(Component.literal("Network Settings"), btn -> {
             display_network_settings = !display_network_settings;
@@ -61,9 +61,9 @@ public class GeneratorScreen extends Screen
 
         String energyText = "No data";
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof BlockEntityGenerator gen)
+        if (be instanceof BlockEntityEnergyAcceptor acceptor)
         {
-            EnergyStorage storage = gen.GetEnergyStorage();
+            EnergyStorage storage = acceptor.GetEnergyStorage();
             if (storage != null)
                 energyText = storage.toString();
         }
