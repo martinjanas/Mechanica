@@ -25,6 +25,18 @@ public class NetworkManager
             network.OnServerTick();
     }
 
+    public String GetNetworkName(int index)
+    {
+        if (index < 0 || index >= networks.size())
+            return null;
+        return (String) networks.keySet().toArray()[index];
+    }
+
+    public final HashMap<String, BaseNetwork<?>> GetNetworks()
+    {
+        return networks;
+    }
+
     public <T extends BaseNetwork<?>> boolean Register(String network_name, Supplier<? extends T> factory)
     {
         if (networks.containsKey(network_name))
@@ -45,7 +57,7 @@ public class NetworkManager
         if (network != null)
         {
             network.Join(device);
-            System.out.println("Block added to network: " + BuiltInRegistries.BLOCK.getKey(device.getBlockState().getBlock()).toString());
+            System.out.println("Block added to network: " + network_name + " - " + BuiltInRegistries.BLOCK.getKey(device.getBlockState().getBlock()).toString());
 
             return true;
         }
