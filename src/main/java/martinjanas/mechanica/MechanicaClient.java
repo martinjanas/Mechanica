@@ -9,6 +9,10 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
+import martinjanas.mechanica.block_entities.BlockEntityGenerator;
+import martinjanas.mechanica.client.screens.GeneratorScreen;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Mechanica.MOD_ID, dist = Dist.CLIENT)
@@ -27,5 +31,17 @@ public class MechanicaClient {
         // Some client setup code
         Mechanica.LOGGER.info("HELLO FROM CLIENT SETUP");
         Mechanica.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+    }
+
+    @SubscribeEvent
+    public static void OnClientRightClick(PlayerInteractEvent.RightClickBlock event)
+    {
+        var level = event.getLevel();
+        if (!level.isClientSide())
+            return;
+
+        var be = level.getBlockEntity(event.getPos());
+        if (be instanceof BlockEntityGenerator generator)
+            Minecraft.getInstance().setScreen(new GeneratorScreen(generator));
     }
 }

@@ -66,6 +66,8 @@ public class EnergyStorage
     @Override
     public String toString()
     {
-        return buffer.GetJoules() + "J, " + "kWh: " + buffer.ToKWH();
+        String string = String.format(java.util.Locale.US, "%d J, %.1f kWh", buffer.GetJoules(), buffer.ToKWH());
+
+        return string;
     }
 }
