@@ -1,35 +1,36 @@
 package martinjanas.mechanica.block_entities;
 
 import martinjanas.mechanica.api.energy.EnergyStorage;
-import martinjanas.mechanica.api.network.EnergyNetwork;
-import martinjanas.mechanica.api.network.NetworkManager;
+import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
-import martinjanas.mechanica.client.screens.GeneratorScreen;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import java.util.UUID;
 
 public class BlockEntityGenerator extends BaseMachineBlockEntity
 {
     public long JOULES_PER_TICK = 3000; //25 joules per tick for real 1 kWh per irl hour
-
     private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
+    private UUID uuid;
 
     public BlockEntityGenerator(BlockPos pos, BlockState blockState)
     {
         super(BlockEntityRegistry.generator.get(), pos, blockState);
+        uuid = UUID.randomUUID();
     }
 
     public <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T e)
@@ -40,7 +41,12 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         buffer.Insert(JOULES_PER_TICK);
         setChanged();
 
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
+        long energy = buffer.GetStored();
+
+        ServerLevel sl = (ServerLevel)level;
+
+        sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
+                .forEach(player -> player.connection.send(new EnergyUpdatePacket(pos, energy)));
 
         System.out.println("Generator: " + buffer.toString());
     }
@@ -50,8 +56,6 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     {
         super.saveAdditional(tag, registries);
         tag.putLong("EnergyStored", buffer.GetStored());
-
-        setChanged();
     }
 
     @Override
@@ -61,14 +65,18 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     }
 
     @Override
+    public UUID GetUUID()
+    {
+        return uuid;
+    }
+
+    @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
 
         if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
             buffer.SetStored(tag.getLong("EnergyStored"));
-
-        setChanged();
     }
 
     @Override
@@ -95,7 +103,8 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)
     {
-        super.onDataPacket(net, pkt, lookupProvider);
+        handleUpdateTag(pkt.getTag(), lookupProvider);
+        //super.onDataPacket(net, pkt, lookupProvider);
     }
 
     @Override

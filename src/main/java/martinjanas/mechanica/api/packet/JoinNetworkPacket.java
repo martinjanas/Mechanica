@@ -7,6 +7,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.UUID;
+
 public record JoinNetworkPacket(String name, BlockPos pos) implements CustomPacketPayload
 {
     public static final Type<JoinNetworkPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("mechanica", "join_network"));
@@ -31,3 +33,4 @@ public record JoinNetworkPacket(String name, BlockPos pos) implements CustomPack
         return TYPE;
     }
 }
+

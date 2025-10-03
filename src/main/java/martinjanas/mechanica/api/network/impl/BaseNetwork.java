@@ -1,15 +1,44 @@
 package martinjanas.mechanica.api.network.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
-public abstract class BaseNetwork<T>
+import java.util.*;
+import java.util.stream.Collectors;
+
+public abstract class BaseNetwork<T extends BaseMachineBlockEntity>
 {
-    protected final Set<T> devices = new HashSet<>();
+    private final String network_name;
+    public HashMap<UUID, T> devices = new HashMap<>();
 
-    public void Join(T device)
+    protected BaseNetwork(String network_name)
     {
-        devices.add(device);
+        this.network_name = network_name;
+    }
+
+    public abstract List<UUID> GetDeviceUUIDs();
+
+    public String GetName()
+    {
+        return network_name;
+    }
+
+    public Map<UUID, T> GetDevicesByUUID()
+    {
+        return devices.values().stream().collect(Collectors.toMap(BaseMachineBlockEntity::GetUUID, d -> d));
+    }
+
+    public List<BlockPos> GetDevicePositions()
+    {
+        return devices.values().stream()
+                .map(BaseMachineBlockEntity::getBlockPos)
+                .toList();
+    }
+
+    public void Join(UUID uuid, T device)
+    {
+        devices.put(uuid, device);
     }
 
     public void Disconnect(T device)
@@ -17,5 +46,27 @@ public abstract class BaseNetwork<T>
         devices.remove(device);
     }
 
-    public abstract void OnServerTick();
+    public final HashMap<UUID, T> GetDevices()
+    {
+        return devices;
+    }
+
+    public void UpdateDevices(HashMap<UUID, T> new_devices)
+    {
+        devices.clear();
+        devices.putAll(new_devices);
+    }
+
+    public boolean HasDevice(UUID id)
+    {
+        for (var device : devices.values())
+        {
+            if (device instanceof BaseMachineBlockEntity d && d.GetUUID().equals(id))
+                return true;
+        }
+
+        return false;
+    }
+
+    public abstract void OnServerTick(Level level);
 }

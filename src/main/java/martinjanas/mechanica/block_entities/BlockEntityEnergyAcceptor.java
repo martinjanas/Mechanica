@@ -2,6 +2,7 @@ package martinjanas.mechanica.block_entities;
 
 import martinjanas.mechanica.api.energy.EnergyStorage;
 import martinjanas.mechanica.api.network.NetworkManager;
+import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
 import martinjanas.mechanica.registries.CapabilityRegistry;
@@ -14,6 +15,8 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,15 +26,19 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 {
     private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
     private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
+    private UUID uuid;
 
     //TODO: Desync between server & client when sending energy across network - fix
     public BlockEntityEnergyAcceptor(BlockPos pos, BlockState blockState)
     {
         super(BlockEntityRegistry.energy_acceptor.get(), pos, blockState);
+        uuid = UUID.randomUUID();
     }
 
     public <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T e)
@@ -58,7 +65,6 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
         }
 
         setChanged();
-        level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 
         System.out.println("EnergyAcceptor: " + GetEnergyStorage().toString());
     }
@@ -67,6 +73,12 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     public EnergyStorage GetEnergyStorage()
     {
         return buffer;
+    }
+
+    @Override
+    public UUID GetUUID()
+    {
+        return uuid;
     }
 
     @Override
@@ -110,7 +122,8 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider)
     {
-        super.onDataPacket(net, pkt, lookupProvider);
+        handleUpdateTag(pkt.getTag(), lookupProvider);
+        //super.onDataPacket(net, pkt, lookupProvider);
     }
 
     @Override

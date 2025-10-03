@@ -10,8 +10,7 @@ public record RegisterNetworkPacket(String name) implements CustomPacketPayload
 {
     public static final Type<RegisterNetworkPacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("mechanica", "register_network"));
 
-    public static final StreamCodec<FriendlyByteBuf, RegisterNetworkPacket> CODEC =
-            CustomPacketPayload.codec(RegisterNetworkPacket::encode, RegisterNetworkPacket::decode);
+    public static final StreamCodec<FriendlyByteBuf, RegisterNetworkPacket> CODEC = CustomPacketPayload.codec(RegisterNetworkPacket::encode, RegisterNetworkPacket::decode);
 
     private static void encode(RegisterNetworkPacket pkt, FriendlyByteBuf buf)
     {

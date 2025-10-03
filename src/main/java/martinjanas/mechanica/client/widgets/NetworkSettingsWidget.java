@@ -35,10 +35,9 @@ public class NetworkSettingsWidget extends AbstractWidget
     Font font;
     BaseMachineBlockEntity machine;
 
-    final List<String> GetNetworkNames()
-    {
-        return new ArrayList<>(NetworkManager.Get().GetNetworks().keySet());
-    }
+    List<String> network_names = new ArrayList<>(NetworkManager.Get().GetNetworks().keySet());
+
+    public static NetworkSettingsWidget INSTANCE;
 
     public NetworkSettingsWidget(Vector2i pos, Vector2i size, Minecraft mc, BaseMachineBlockEntity machine)
     {
@@ -61,6 +60,7 @@ public class NetworkSettingsWidget extends AbstractWidget
 
         this.font = mc.font;
         this.machine = machine;
+        INSTANCE = this;
     }
 
     @Override
@@ -77,7 +77,6 @@ public class NetworkSettingsWidget extends AbstractWidget
         graphics.drawString(font, "Networks:", this.pos.x + 10, this.pos.y + 60, 0xFFFFFF, false);
 
         int listY = this.pos.y + 80;
-        final var network_names = GetNetworkNames();
         int total_networks = network_names.size();
         int visible_count = Math.min(MAX_VISIBLE_NETWORKS, total_networks);
         int start_index = scroll_offset;
@@ -130,8 +129,6 @@ public class NetworkSettingsWidget extends AbstractWidget
         boolean network_name_clicked = name_input.mouseClicked(mouseX, mouseY, button);
         name_input.setFocused(network_name_clicked);
         btn_add_network.mouseClicked(mouseX, mouseY, button);
-
-        final var network_names = GetNetworkNames();
 
         int list_y = this.pos.y + 80;
         int total_networks = network_names.size();
@@ -191,7 +188,6 @@ public class NetworkSettingsWidget extends AbstractWidget
         if (!is_dragging_thumb)
             return false;
 
-        final var network_names = GetNetworkNames();
         int total_networks = network_names.size();
         int scrollbar_height = MAX_VISIBLE_NETWORKS * 18;
         int thumb_height = Math.max(18, scrollbar_height * MAX_VISIBLE_NETWORKS / total_networks);
@@ -229,7 +225,6 @@ public class NetworkSettingsWidget extends AbstractWidget
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY)
     {
-        final var network_names = GetNetworkNames();
         int total_networks = network_names.size();
         int maxScroll = Math.max(0, total_networks - MAX_VISIBLE_NETWORKS);
         int listY = this.pos.y + 80;
@@ -251,5 +246,19 @@ public class NetworkSettingsWidget extends AbstractWidget
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    public void RefreshNetworkList()
+    {
+        // Pull fresh list from NetworkManager
+        this.network_names = new ArrayList<>(NetworkManager.Get().GetNetworks().keySet());
+
+        // Reset selection if the previous selection is no longer valid
+        if (selected_network >= network_names.size()) {
+            selected_network = -1;
+        }
+
+        // Reset scroll if needed
+        scroll_offset = 0;
     }
 }
