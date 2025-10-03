@@ -59,14 +59,12 @@ public class NetworkManager
                     case FLUID -> new EnergyNetwork(data.network_name());
                 };
 
-                /*for (var block_pos : data.device_positions())
+                for (var block_pos : data.device_positions())
                 {
                     BlockEntity device = level.getBlockEntity(block_pos);
                     if (device instanceof BaseMachineBlockEntity machine)
                         net.Join(machine.GetUUID(), machine);
-
-                    //(new JoinNetworkPacket(data.network_name(), block_pos));
-                }*/
+                }
 
                 networks.put(data.network_name(), net);
             }

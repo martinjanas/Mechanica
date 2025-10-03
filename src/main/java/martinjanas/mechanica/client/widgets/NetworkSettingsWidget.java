@@ -2,6 +2,7 @@ package martinjanas.mechanica.client.widgets;
 
 import martinjanas.mechanica.api.network.EnergyNetwork;
 import martinjanas.mechanica.api.network.NetworkManager;
+import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.api.packet.JoinNetworkPacket;
 import martinjanas.mechanica.api.packet.RegisterNetworkPacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
@@ -13,6 +14,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -53,6 +56,7 @@ public class NetworkSettingsWidget extends AbstractWidget
             {
                 //TODO: This doesnt fire on the client when playing on server, or something is just wrong - the
                 // network isnt added on the clientside
+
                 Minecraft.getInstance().getConnection().send(new RegisterNetworkPacket(name));
                 name_input.setValue("");
             }
@@ -250,7 +254,6 @@ public class NetworkSettingsWidget extends AbstractWidget
 
     public void RefreshNetworkList()
     {
-        // Pull fresh list from NetworkManager
         this.network_names = new ArrayList<>(NetworkManager.Get().GetNetworks().keySet());
 
         // Reset selection if the previous selection is no longer valid

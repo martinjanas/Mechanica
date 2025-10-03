@@ -101,6 +101,8 @@ public class EventManager
                         List<NetworkData> data_list = NetworkManager.Get().GetNetworks().values().stream().map(net -> new NetworkData(net.GetName(), NetworkType.ENERGY, net.GetDevicePositions())).toList();
                         player.connection.send(new SyncNetworksPacket(data_list));
 
+                        NetworkManager.Get().UpdateNetworksFromData(data_list, true, context.player().level());
+
                         Mechanica.LOGGER.info("RegisterNetworkPacket called");
                     }
                 }
@@ -130,11 +132,13 @@ public class EventManager
             });
         });
 
+        //TODO: Networks transfer from singleplayer to multiplayer world/level and also when playing on server
+        // the network list isnt updating at all when adding new network
+
         event.registrar("mechanica").playToClient(SyncNetworksPacket.TYPE, SyncNetworksPacket.CODEC, (pkt, context) ->
         {
             context.enqueueWork(() ->
             {
-                //UpdateNetworksFromData - Somehow fucks up shit?
                 //NetworkManager.Get().UpdateNetworksFromData(pkt.networks(), true, context.player().level());
 
                 if (NetworkSettingsWidget.INSTANCE != null)
