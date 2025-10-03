@@ -41,9 +41,9 @@ public abstract class BaseNetwork<T extends BaseMachineBlockEntity>
         devices.put(uuid, device);
     }
 
-    public void Disconnect(T device)
+    public void Disconnect(UUID uuid)
     {
-        devices.remove(device);
+        devices.remove(uuid);
     }
 
     public final HashMap<UUID, T> GetDevices()

@@ -1,6 +1,5 @@
 package martinjanas.mechanica.api.packet;
 
-import martinjanas.mechanica.api.network.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

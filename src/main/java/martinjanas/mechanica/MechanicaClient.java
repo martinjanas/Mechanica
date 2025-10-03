@@ -1,7 +1,9 @@
 package martinjanas.mechanica;
 
+import martinjanas.mechanica.api.network.ClientNetworkManager;
 import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
 import martinjanas.mechanica.client.screens.EnergyAcceptorScreen;
+import martinjanas.mechanica.client.widgets.NetworkSettingsWidget;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,6 +17,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.client.screens.GeneratorScreen;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Mechanica.MOD_ID, dist = Dist.CLIENT)
@@ -50,5 +53,14 @@ public class MechanicaClient
 
         if (be instanceof BlockEntityEnergyAcceptor acceptor)
             Minecraft.getInstance().setScreen(new EnergyAcceptorScreen(acceptor));
+    }
+
+    @SubscribeEvent
+    public static void OnClientWorldLoad(LevelEvent.Load event)
+    {
+        ClientNetworkManager.Get().ClearNetworks();
+
+        if (NetworkSettingsWidget.INSTANCE != null)
+            NetworkSettingsWidget.INSTANCE.RefreshNetworkList();
     }
 }
