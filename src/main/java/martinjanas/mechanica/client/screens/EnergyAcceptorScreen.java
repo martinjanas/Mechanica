@@ -1,8 +1,7 @@
 package martinjanas.mechanica.client.screens;
 
-import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
-import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.client.widgets.NetworkSettingsWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -63,9 +62,9 @@ public class EnergyAcceptorScreen extends Screen
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof BlockEntityEnergyAcceptor acceptor)
         {
-            EnergyStorage storage = acceptor.GetEnergyStorage();
+            RFEnergyStorage storage = acceptor.GetEnergyStorage();
             if (storage != null)
-                energyText = storage.toString();
+                energyText = storage.getEnergyStored() + " RF";
         }
 
         int energyWidth = this.font.width(energyText);

@@ -1,6 +1,7 @@
 package martinjanas.mechanica.api.event;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.api.network.*;
 import martinjanas.mechanica.api.packet.*;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
@@ -9,15 +10,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -149,7 +150,7 @@ public class EventManager
             {
                 BlockEntity be = Minecraft.getInstance().level.getBlockEntity(pkt.pos());
                 if (be instanceof BaseMachineBlockEntity machine)
-                    machine.GetEnergyStorage().SetStored(pkt.energy());
+                    machine.GetEnergyStorage().SetEnergy(pkt.energy()); //for ui update
             });
         });
     }

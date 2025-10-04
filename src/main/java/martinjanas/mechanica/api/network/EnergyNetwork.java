@@ -4,18 +4,16 @@ import martinjanas.mechanica.api.network.impl.BaseNetwork;
 import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
-
 import java.util.List;
 import java.util.UUID;
 
 public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
 {
-    long joules_per_tick = 0;
+    int rf_per_tick = 0;
 
     public EnergyNetwork(String network_name)
     {
@@ -37,31 +35,22 @@ public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
         {
             if (device instanceof BlockEntityGenerator generator && devices.size() >= 2)
             {
-                generator.GetEnergyStorage().Extract(generator.JOULES_PER_TICK);
+                generator.GetEnergyStorage().extractEnergy(generator.RF_PER_TICK, false);
                 generator.setChanged();
-                joules_per_tick = generator.JOULES_PER_TICK;
+                rf_per_tick = generator.RF_PER_TICK;
 
                 ServerLevel sl = (ServerLevel)level;
-
-                long energy = generator.GetEnergyStorage().GetStored();
-
+                int energy = generator.GetEnergyStorage().getEnergyStored();
                 PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(generator.getBlockPos()), new EnergyUpdatePacket(generator.getBlockPos(), energy));
-                //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(generator.getBlockPos()), false)
-                  //      .forEach(player -> player.connection.send(new EnergyUpdatePacket(generator.getBlockPos(), energy)));
             }
             else
             {
-                device.GetEnergyStorage().Insert(joules_per_tick);
+                device.GetEnergyStorage().receiveEnergy(rf_per_tick, false);
                 device.setChanged();
 
                 ServerLevel sl = (ServerLevel)level;
-
-                long energy = device.GetEnergyStorage().GetStored();
-
+                int energy = device.GetEnergyStorage().getEnergyStored();
                 PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(device.getBlockPos()), new EnergyUpdatePacket(device.getBlockPos(), energy));
-
-                //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(device.getBlockPos()), false)
-                 //       .forEach(player -> player.connection.send(new EnergyUpdatePacket(device.getBlockPos(), energy)));
             }
         }
 

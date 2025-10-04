@@ -1,6 +1,6 @@
 package martinjanas.mechanica.block_entities;
 
-import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
@@ -15,7 +15,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -24,8 +23,8 @@ import java.util.UUID;
 
 public class BlockEntityGenerator extends BaseMachineBlockEntity
 {
-    public long JOULES_PER_TICK = 3000; //25 joules per tick for real 1 kWh per irl hour
-    private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
+    public int RF_PER_TICK = 20;
+    private RFEnergyStorage buffer = new RFEnergyStorage(100000, 200, 200);
     private UUID uuid;
 
     public BlockEntityGenerator(BlockPos pos, BlockState blockState)
@@ -39,30 +38,23 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
         if (level.isClientSide())
             return;
 
-        buffer.Insert(JOULES_PER_TICK);
+        buffer.receiveEnergy(RF_PER_TICK, false);
         setChanged();
 
-        long energy = buffer.GetStored();
-
+        int energy = buffer.getEnergyStored();
         ServerLevel sl = (ServerLevel)level;
-
         PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(pos), new EnergyUpdatePacket(pos, energy));
-
-        //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
-                //.forEach(player -> player.connection.send(new EnergyUpdatePacket(pos, energy)));
-
-        System.out.println("Generator: " + buffer.toString());
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putLong("EnergyStored", buffer.GetStored());
+        tag.put("EnergyStored", buffer.serializeNBT(registries));
     }
 
     @Override
-    public EnergyStorage GetEnergyStorage()
+    public RFEnergyStorage GetEnergyStorage()
     {
         return buffer;
     }
@@ -77,9 +69,8 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-
-        if (tag.contains("EnergyStored" /*, NumericTag.TAG_LONG*/))
-            buffer.SetStored(tag.getLong("EnergyStored"));
+        if (tag.contains("EnergyStored", NumericTag.TAG_INT))
+            buffer.deserializeNBT(registries, tag.get("EnergyStored"));
     }
 
     @Override

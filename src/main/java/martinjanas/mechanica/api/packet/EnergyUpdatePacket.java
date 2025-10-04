@@ -6,7 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record EnergyUpdatePacket(BlockPos pos, long energy) implements CustomPacketPayload
+public record EnergyUpdatePacket(BlockPos pos, int energy) implements CustomPacketPayload
 {
     public static final Type<EnergyUpdatePacket> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("mechanica", "energy_update"));
     public static final StreamCodec<FriendlyByteBuf, EnergyUpdatePacket> CODEC = CustomPacketPayload.codec(EnergyUpdatePacket::encode, EnergyUpdatePacket::decode);
@@ -14,13 +14,13 @@ public record EnergyUpdatePacket(BlockPos pos, long energy) implements CustomPac
     private static void encode(EnergyUpdatePacket pkt, FriendlyByteBuf buf)
     {
         buf.writeBlockPos(pkt.pos());
-        buf.writeLong(pkt.energy());
+        buf.writeInt(pkt.energy());
     }
 
     private static EnergyUpdatePacket decode(FriendlyByteBuf buf)
     {
         BlockPos pos = buf.readBlockPos();
-        long energy = buf.readLong();
+        int energy = buf.readInt();
 
         return new EnergyUpdatePacket(pos, energy);
     }

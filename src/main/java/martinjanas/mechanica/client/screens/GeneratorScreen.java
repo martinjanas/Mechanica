@@ -1,5 +1,6 @@
 package martinjanas.mechanica.client.screens;
 
+import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.client.widgets.NetworkSettingsWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -8,8 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
-
-import martinjanas.mechanica.api.energy.EnergyStorage;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import org.joml.Vector2i;
 
@@ -63,9 +62,9 @@ public class GeneratorScreen extends Screen
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof BlockEntityGenerator gen)
         {
-            EnergyStorage storage = gen.GetEnergyStorage();
+            RFEnergyStorage storage = gen.GetEnergyStorage();
             if (storage != null)
-                energyText = storage.toString();
+                energyText = storage.getEnergyStored() + " RF";
         }
 
         int energyWidth = this.font.width(energyText);

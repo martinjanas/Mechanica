@@ -1,9 +1,8 @@
 package martinjanas.mechanica.block_entities;
 
-import martinjanas.mechanica.api.energy.EnergyStorage;
+import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
-import martinjanas.mechanica.registries.CapabilityRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -16,13 +15,16 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.EnergyStorage;
+import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
 {
-    private EnergyStorage buffer = new EnergyStorage(1.0, 1.0, 1.0);
+    private RFEnergyStorage buffer = new RFEnergyStorage(100000, 200, 200);
     private long joules_per_tick = 25; //25 joules per tick for real 1 kWh per irl hour
     private UUID uuid;
 
@@ -44,24 +46,22 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
             if (neighbor == null)
                 continue;
 
-            EnergyStorage source_buffer = CapabilityRegistry.ENERGY.getCapability(level, neighbor_pos, level.getBlockState(neighbor_pos), neighbor, null);
+            IEnergyStorage source_buffer = Capabilities.EnergyStorage.BLOCK.getCapability(level, neighbor_pos, level.getBlockState(neighbor_pos), neighbor, null);
             if (source_buffer == null)
                 continue;
 
             if (!(neighbor instanceof BlockEntityGenerator generator))
                 continue;
 
-            source_buffer.Extract(generator.JOULES_PER_TICK);
-            buffer.Insert(generator.JOULES_PER_TICK);
+            source_buffer.extractEnergy(generator.RF_PER_TICK, false);
+            buffer.receiveEnergy(generator.RF_PER_TICK, false);
         }
 
         setChanged();
-
-        System.out.println("EnergyAcceptor: " + GetEnergyStorage().toString());
     }
 
     @Override
-    public EnergyStorage GetEnergyStorage()
+    public RFEnergyStorage GetEnergyStorage()
     {
         return buffer;
     }
@@ -82,16 +82,15 @@ public class BlockEntityEnergyAcceptor extends BaseMachineBlockEntity
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.saveAdditional(tag, registries);
-        tag.putLong("EnergyStored", buffer.GetStored());
+        tag.put("EnergyStored", buffer.serializeNBT(registries));
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
         super.loadAdditional(tag, registries);
-
-        if (tag.contains("EnergyStored" , NumericTag.TAG_LONG))
-            buffer.SetStored(tag.getLong("EnergyStored"));
+        if (tag.contains("EnergyStored", NumericTag.TAG_INT))
+            buffer.deserializeNBT(registries, tag.get("EnergyStored"));
     }
 
     @Override
