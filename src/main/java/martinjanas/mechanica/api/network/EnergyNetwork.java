@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,8 +44,10 @@ public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
                 ServerLevel sl = (ServerLevel)level;
 
                 long energy = generator.GetEnergyStorage().GetStored();
-                sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(generator.getBlockPos()), false)
-                        .forEach(player -> player.connection.send(new EnergyUpdatePacket(generator.getBlockPos(), energy)));
+
+                PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(generator.getBlockPos()), new EnergyUpdatePacket(generator.getBlockPos(), energy));
+                //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(generator.getBlockPos()), false)
+                  //      .forEach(player -> player.connection.send(new EnergyUpdatePacket(generator.getBlockPos(), energy)));
             }
             else
             {
@@ -54,8 +57,11 @@ public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
                 ServerLevel sl = (ServerLevel)level;
 
                 long energy = device.GetEnergyStorage().GetStored();
-                sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(device.getBlockPos()), false)
-                        .forEach(player -> player.connection.send(new EnergyUpdatePacket(device.getBlockPos(), energy)));
+
+                PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(device.getBlockPos()), new EnergyUpdatePacket(device.getBlockPos(), energy));
+
+                //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(device.getBlockPos()), false)
+                 //       .forEach(player -> player.connection.send(new EnergyUpdatePacket(device.getBlockPos(), energy)));
             }
         }
 

@@ -18,6 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
@@ -45,8 +46,10 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
 
         ServerLevel sl = (ServerLevel)level;
 
-        sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
-                .forEach(player -> player.connection.send(new EnergyUpdatePacket(pos, energy)));
+        PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(pos), new EnergyUpdatePacket(pos, energy));
+
+        //sl.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
+                //.forEach(player -> player.connection.send(new EnergyUpdatePacket(pos, energy)));
 
         System.out.println("Generator: " + buffer.toString());
     }

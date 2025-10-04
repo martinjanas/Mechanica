@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class NetworkSettingsWidget extends AbstractWidget
             String name = name_input.getValue().trim();
             if (!name.isEmpty())
             {
-                Minecraft.getInstance().getConnection().send(new RegisterNetworkPacket(name));
+                PacketDistributor.sendToServer(new RegisterNetworkPacket(name));
                 name_input.setValue("");
             }
         }).bounds(this.pos.x + this.size.x - 40, this.pos.y + 30, 30, 20).build();
@@ -138,7 +139,7 @@ public class NetworkSettingsWidget extends AbstractWidget
             if (mouseX >= this.pos.x + 20 && mouseX <= this.pos.x + this.size.x - 36 && mouseY >= entry_y && mouseY <= entry_y + 16)
             {
                 selected_network = i;
-                Minecraft.getInstance().getConnection().send(new JoinNetworkPacket(network_names.get(i), machine.getBlockPos()));
+                PacketDistributor.sendToServer(new JoinNetworkPacket(network_names.get(i), machine.getBlockPos()));
             }
         }
 

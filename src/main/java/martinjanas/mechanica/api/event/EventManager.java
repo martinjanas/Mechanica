@@ -19,6 +19,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import java.util.List;
 
@@ -103,7 +104,7 @@ public class EventManager
                     if (registered)
                     {
                         List<NetworkData> data_list = ServerNetworkManager.Get().GetNetworks().values().stream().map(net -> new NetworkData(net.GetName(), NetworkType.ENERGY, net.GetDevicePositions())).toList();
-                        player.connection.send(new SyncNetworksPacket(data_list));
+                        PacketDistributor.sendToPlayer(player, new SyncNetworksPacket(data_list));
                     }
                 }
             });
@@ -124,7 +125,8 @@ public class EventManager
                         ServerNetworkManager.Get().Join(pkt.name(), device);
 
                         List<NetworkData> data_list = ServerNetworkManager.Get().GetNetworks().values().stream().map(net -> new NetworkData(net.GetName(), NetworkType.ENERGY, net.GetDevicePositions())).toList();
-                        player.connection.send(new SyncNetworksPacket(data_list));
+
+                        PacketDistributor.sendToPlayer(player, new SyncNetworksPacket(data_list));
                     }
                 }
             });
