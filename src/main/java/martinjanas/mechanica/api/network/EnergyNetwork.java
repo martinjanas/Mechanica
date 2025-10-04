@@ -1,7 +1,9 @@
 package martinjanas.mechanica.api.network;
 
+import martinjanas.mechanica.Mechanica;
 import martinjanas.mechanica.api.network.impl.BaseNetwork;
 import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
+import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
 import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +16,7 @@ import java.util.UUID;
 public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
 {
     int rf_per_tick = 0;
+    boolean flag = false;
 
     public EnergyNetwork(String network_name)
     {
@@ -31,29 +34,49 @@ public class EnergyNetwork extends BaseNetwork<BaseMachineBlockEntity>
     @Override
     public void OnServerTick(Level level)
     {
+        int generator_count = 0;
+        int acceptor_count = 0;
+
         for (var device : devices.values())
         {
-            if (device instanceof BlockEntityGenerator generator && devices.size() >= 2)
-            {
-                generator.GetEnergyStorage().extractEnergy(generator.RF_PER_TICK, false);
-                generator.setChanged();
-                rf_per_tick = generator.RF_PER_TICK;
-
-                ServerLevel sl = (ServerLevel)level;
-                int energy = generator.GetEnergyStorage().getEnergyStored();
-                PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(generator.getBlockPos()), new EnergyUpdatePacket(generator.getBlockPos(), energy));
-            }
-            else
-            {
-                device.GetEnergyStorage().receiveEnergy(rf_per_tick, false);
-                device.setChanged();
-
-                ServerLevel sl = (ServerLevel)level;
-                int energy = device.GetEnergyStorage().getEnergyStored();
-                PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(device.getBlockPos()), new EnergyUpdatePacket(device.getBlockPos(), energy));
-            }
+            if (device instanceof BlockEntityGenerator)
+                generator_count++;
+            else if (device instanceof BlockEntityEnergyAcceptor)
+                acceptor_count++;
         }
 
-        //TODO: Implement correct generator -> energy acceptor energy interaction
+        if (generator_count == 0 || acceptor_count == 0)
+            return;
+
+        int total_generated_rf = generator_count * BlockEntityGenerator.RF_PER_TICK;
+        List<BaseMachineBlockEntity> non_full_acceptors = devices.values().stream()
+                .filter(dev -> dev instanceof BlockEntityEnergyAcceptor && !dev.GetEnergyStorage().IsFull())
+                .map(dev -> (BaseMachineBlockEntity) dev)
+                .toList();
+
+        if (non_full_acceptors.isEmpty())
+            return;
+
+        int rf_per_acceptor = total_generated_rf / non_full_acceptors.size();
+        for (var acceptor : non_full_acceptors)
+        {
+            acceptor.GetEnergyStorage().receiveEnergy(rf_per_acceptor, false);
+            acceptor.setChanged();
+        }
+
+        int energy_used = rf_per_acceptor * non_full_acceptors.size();
+        int energy_per_generator = energy_used / generator_count;
+        for (var device : devices.values())
+        {
+            if (device instanceof BlockEntityGenerator generator)
+            {
+                generator.GetEnergyStorage().extractEnergy(energy_per_generator, false);
+                generator.setChanged();
+            }
+
+            //ServerLevel sl = (ServerLevel) level;
+            //int energy = device.GetEnergyStorage().getEnergyStored();
+            //PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(device.getBlockPos()), new EnergyUpdatePacket(device.getBlockPos(), energy));
+        }
     }
 }

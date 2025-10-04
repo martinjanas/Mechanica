@@ -4,10 +4,15 @@ import martinjanas.mechanica.Mechanica;
 import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.api.network.*;
 import martinjanas.mechanica.api.packet.*;
+import martinjanas.mechanica.block_entities.BlockEntityEnergyAcceptor;
+import martinjanas.mechanica.block_entities.BlockEntityGenerator;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
+import martinjanas.mechanica.client.screens.EnergyAcceptorScreen;
+import martinjanas.mechanica.client.screens.GeneratorScreen;
 import martinjanas.mechanica.client.widgets.NetworkSettingsWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -15,8 +20,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.client.event.ContainerScreenEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -151,6 +159,8 @@ public class EventManager
                 BlockEntity be = Minecraft.getInstance().level.getBlockEntity(pkt.pos());
                 if (be instanceof BaseMachineBlockEntity machine)
                     machine.GetEnergyStorage().SetEnergy(pkt.energy()); //for ui update
+
+                Mechanica.LOGGER.info("EnergyUpdatePacket called");
             });
         });
     }

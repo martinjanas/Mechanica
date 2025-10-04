@@ -1,9 +1,13 @@
 package martinjanas.mechanica.block_entities;
 
+import martinjanas.mechanica.Mechanica;
 import martinjanas.mechanica.api.energy.RFEnergyStorage;
 import martinjanas.mechanica.api.packet.EnergyUpdatePacket;
 import martinjanas.mechanica.block_entities.impl.BaseMachineBlockEntity;
+import martinjanas.mechanica.client.screens.EnergyAcceptorScreen;
+import martinjanas.mechanica.client.screens.GeneratorScreen;
 import martinjanas.mechanica.registries.BlockEntityRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,15 +21,23 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class BlockEntityGenerator extends BaseMachineBlockEntity
 {
-    public int RF_PER_TICK = 20;
-    private RFEnergyStorage buffer = new RFEnergyStorage(100000, 200, 200);
+    public static int RF_PER_TICK = 20;
+    private RFEnergyStorage buffer = new RFEnergyStorage(100000, 1000, 1000);
     private UUID uuid;
+
+    private int tick_counter = 0;
+    private int last_sent_energy = 0;
+
+    public boolean should_send_packet = false;
 
     public BlockEntityGenerator(BlockPos pos, BlockState blockState)
     {
@@ -35,15 +47,34 @@ public class BlockEntityGenerator extends BaseMachineBlockEntity
 
     public <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T e)
     {
+        if (Minecraft.getInstance().screen instanceof GeneratorScreen)
+            should_send_packet = true;
+        else should_send_packet = false;
+
         if (level.isClientSide())
             return;
 
         buffer.receiveEnergy(RF_PER_TICK, false);
         setChanged();
 
-        int energy = buffer.getEnergyStored();
-        ServerLevel sl = (ServerLevel)level;
-        PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(pos), new EnergyUpdatePacket(pos, energy));
+        if (tick_counter >= 2 && should_send_packet)
+        {
+            int current_energy = buffer.getEnergyStored();
+
+            int delta = current_energy - last_sent_energy;
+            if (current_energy != last_sent_energy || delta != 0)
+            {
+                PacketDistributor.sendToPlayersTrackingChunk(
+                        (ServerLevel)level,
+                        new ChunkPos(pos),
+                        new EnergyUpdatePacket(pos, current_energy)
+                );
+                last_sent_energy = current_energy;
+            }
+            tick_counter = 0;
+        }
+
+        tick_counter++;
     }
 
     @Override
