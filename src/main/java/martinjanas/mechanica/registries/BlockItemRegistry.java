@@ -12,6 +12,7 @@ public class BlockItemRegistry implements ModRegistry
     public static DeferredItem<BlockItem> barrel;*/
     public static DeferredItem<BlockItem> generator;
     public static DeferredItem<BlockItem> energy_acceptor;
+    public static DeferredItem<BlockItem> windmill;
 
     @Override
     public void register(IEventBus bus)
@@ -23,5 +24,6 @@ public class BlockItemRegistry implements ModRegistry
         barrel = items.registerSimpleBlockItem("barrel", BlockRegistry.barrel);*/
         generator = items.registerSimpleBlockItem("generator", BlockRegistry.generator);
         energy_acceptor = items.registerSimpleBlockItem("energy_acceptor", BlockRegistry.energy_acceptor);
+        windmill = items.registerSimpleBlockItem("windmill", BlockRegistry.windmill);
     }
 }

@@ -3,6 +3,7 @@ package martinjanas.mechanica.registries;
 import martinjanas.mechanica.Mechanica;
 import martinjanas.mechanica.blocks.BlockEnergyAcceptor;
 import martinjanas.mechanica.blocks.BlockGenerator;
+import martinjanas.mechanica.blocks.BlockWindmill;
 import martinjanas.mechanica.registries.impl.ModRegistry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,6 +21,7 @@ public class BlockRegistry implements ModRegistry
     public static DeferredBlock<Block> barrel;*/
     public static DeferredBlock<Block> generator;
     public static DeferredBlock<Block> energy_acceptor;
+    public static DeferredBlock<Block> windmill;
 
     @Override
     public void register(IEventBus bus)
@@ -29,6 +31,7 @@ public class BlockRegistry implements ModRegistry
         barrel = blocks.register("barrel", () -> new BlockBarrel(BlockBehaviour.Properties.of().strength(1f, 1200f)));*/
         generator = blocks.register("generator", () -> new BlockGenerator(BlockBehaviour.Properties.of().strength(1f, 1200f)));
         energy_acceptor = blocks.register("energy_acceptor", () -> new BlockEnergyAcceptor(BlockBehaviour.Properties.of().strength(1f, 1200f)));
+        windmill = blocks.register("windmill", () -> new BlockWindmill(BlockBehaviour.Properties.of().strength(1f, 1200f)));
 
         blocks.register(bus);
     }
