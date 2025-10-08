@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "mechanica:block/cable" },
+    "facing=south": { "model": "mechanica:block/cable", "y": 180 },
+    "facing=west":  { "model": "mechanica:block/cable", "y": 270 },
+    "facing=east":  { "model": "mechanica:block/cable", "y": 90 }
+  }
+}

@@ -1,6 +1,7 @@
 package martinjanas.mechanica.registries;
 
 import martinjanas.mechanica.Mechanica;
+import martinjanas.mechanica.blocks.BlockCable;
 import martinjanas.mechanica.blocks.BlockEnergyAcceptor;
 import martinjanas.mechanica.blocks.BlockGenerator;
 import martinjanas.mechanica.blocks.BlockWindmill;
@@ -22,6 +23,7 @@ public class BlockRegistry implements ModRegistry
     public static DeferredBlock<Block> generator;
     public static DeferredBlock<Block> energy_acceptor;
     public static DeferredBlock<Block> windmill;
+    public static DeferredBlock<Block> cable;
 
     @Override
     public void register(IEventBus bus)
@@ -32,6 +34,7 @@ public class BlockRegistry implements ModRegistry
         generator = blocks.register("generator", () -> new BlockGenerator(BlockBehaviour.Properties.of().strength(1f, 1200f)));
         energy_acceptor = blocks.register("energy_acceptor", () -> new BlockEnergyAcceptor(BlockBehaviour.Properties.of().strength(1f, 1200f)));
         windmill = blocks.register("windmill", () -> new BlockWindmill(BlockBehaviour.Properties.of().strength(1f, 1200f)));
+        cable = blocks.register("cable", () -> new BlockCable(BlockBehaviour.Properties.of().strength(1f, 1200f)));
 
         blocks.register(bus);
     }
